@@ -1,7 +1,13 @@
 def add_country():
     num_countries = int(input("How many coutries you want to add : "))
     for i in range(num_countries):
-    	country = input("Enter name of country : ")
+    	while (True):
+    	    country = input("Enter name of country : ")
+    	    if country.isalpha():
+    	        break 
+    	    else:
+    	        print("\n Invalid input")
+    	        continue 
     	countries.append(country)
 
 
@@ -23,7 +29,13 @@ def add_state():
     	print(f"Enter {countries[i]}'s states")
     	num_states = int(input("How many states do you want to add in it : "))
     	for i in range(num_states):
-    	    state = input("Enter state name : ")
+    	    while (True):
+    	        state = input("Enter name of state : ")
+    	        if state.isalpha():
+    	            break 
+    	        else:
+    	            print("\n Invalid input")
+    	            continue 
     	    states.append(state)
 
 
@@ -45,7 +57,12 @@ def add_city():
     	print(f"Enter {states[i]}'s cities")
     	num_cities = int(input("How many city do you want to add in it : "))
     	for i in range(num_cities):
-    	    city = input("Enter city name : ")
+    	    while (True):
+    	        city = input("Enter name of city : ")
+    	        if citty.isalpha():
+    	            break 
+    	        else:
+    	            continue 
     	    cities.append(city)
 
 
@@ -62,25 +79,25 @@ def remove_city():
     cities.remove(rm_city_name)
 
 
-while (True):
-    countries = []
-    states = []
-    cities = []
-    print('''
+while (True): 
+	countries = []
+	states = []
+	cities = []
+	print('''
     1. Add
     2. Update
     3. Delete
-    4. Exit\n''')
-    opt1 = int(input("Select any option what do you want(1 to 4) : "))
+    4. Exit\n''')                               
+    opt1=int(input("Select any option what do you want(1 to 4) : "))
     if opt1 == 1:
-    	while (True):
-    	    print('''
+		while (True):
+		    print('''
     	    1. Do you want to add countries
     	    2. Do you want to add states
     	    3. Do you want to add cities
     	    3. Exit\n''')
     	    opt2=int(input("Select any option what do you want(1 to 4) : "))
-    	    if opt2 == 1:
+    	    if opt2 == 1: 
     	    	add_country()
     	    	continue 
     	    	
@@ -104,7 +121,7 @@ while (True):
     	    2. Do you want to Update states
     	    3. Do you want to Update cities
     	    3. Exit\n''')
-    	    opt3 = int(input("Select any option what do you want(1 to 4) : "))
+            opt3 = int(input("Select any option what do you want(1 to 4) : "))
     	    if opt3 == 1:
     	    	update_country()
     	    	continue 
