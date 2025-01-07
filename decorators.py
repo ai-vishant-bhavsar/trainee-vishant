@@ -1,4 +1,10 @@
+import time
+
+
 def fun1(num):
+	global start
+	start = time.time()
+	print(start)
 	while(True): 
 		print('''
 	1. Addition
@@ -52,6 +58,7 @@ def fun1(num):
 					continue 
 			print(f"{x} // {y} = {x//y}")
 		elif opt == 7:
+			end = time.time()
 			break 
 		else:
 			print("Invalid input!")
@@ -62,3 +69,9 @@ def fun1(num):
 def num():
 	x = int(input("Enter a value: "))
 	return x
+	
+	
+end = time.time()
+print(end)
+
+print(end - start)
