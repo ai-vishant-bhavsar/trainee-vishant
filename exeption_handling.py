@@ -1,14 +1,14 @@
 def add_country():
-    num_countries = int(input("How many coutries you want to add : "))
-    for i in range(num_countries):
-    	while (True):
-    	    country = input("Enter name of country : ")
-    	    if country.isalpha():
-    	        break 
-    	    else:
-    	        print("\n Invalid input")
-    	        continue 
-    	countries.append(country)
+	num_countries = int(input("How many coutries you want to add : "))
+	for i in range(num_countries):
+		while (True):
+			country = input("Enter name of country : ")
+			if country.isalpha():
+				break 
+			else:
+				print("\n Invalid input")
+				continue 
+		countries.append(country)
 
 
 def update_country():
@@ -25,18 +25,18 @@ def remove_country():
 
 
 def add_state():
-    for i in range(len(countries)):
-    	print(f"Enter {countries[i]}'s states")
-    	num_states = int(input("How many states do you want to add in it : "))
-    	for i in range(num_states):
-    	    while (True):
-    	        state = input("Enter name of state : ")
-    	        if state.isalpha():
-    	            break 
-    	        else:
-    	            print("\n Invalid input")
-    	            continue 
-    	    states.append(state)
+	for i in range(len(countries)):
+		print(f"Enter {countries[i]}'s states")
+		num_states = int(input("How many states do you want to add in it : "))
+		for i in range(num_states):
+			while (True):
+				state = input("Enter name of state : ")
+				if state.isalpha():
+					break 
+				else:
+					print("\n Invalid input")
+					continue 
+			states.append(state)
 
 
 def update_state():
@@ -53,17 +53,17 @@ def remove_state():
 
 
 def add_city():
-    for i in range(len(states)):
-    	print(f"Enter {states[i]}'s cities")
-    	num_cities = int(input("How many city do you want to add in it : "))
-    	for i in range(num_cities):
-    	    while (True):
-    	        city = input("Enter name of city : ")
-    	        if citty.isalpha():
-    	            break 
-    	        else:
-    	            continue 
-    	    cities.append(city)
+	for i in range(len(states)):\
+	print(f"Enter {states[i]}'s cities")
+	num_cities = int(input("How many city do you want to add in it : "))
+	for i in range(num_cities):
+		while (True):
+			city = input("Enter name of city : ")
+			if citty.isalpha():
+				break 
+			else:
+				continue 
+		cities.append(city)
 
 
 def update_city():
@@ -87,81 +87,72 @@ while (True):
     1. Add
     2. Update
     3. Delete
-    4. Exit\n''')                               
-    opt1=int(input("Select any option what do you want(1 to 4) : "))
-    if opt1 == 1:
+    4. Exit\n''')
+	opt1 = int(input("Select any option what do you want(1 to 4) : "))
+	if opt1 == 1:
 		while (True):
-		    print('''
+			print('''
     	    1. Do you want to add countries
     	    2. Do you want to add states
     	    3. Do you want to add cities
     	    3. Exit\n''')
-    	    opt2=int(input("Select any option what do you want(1 to 4) : "))
-    	    if opt2 == 1: 
-    	    	add_country()
-    	    	continue 
-    	    	
-    	    elif opt2 == 2:
-    	        add_state()
-    	        continue 
-    	        
-    	    elif opt2 == 3:
-    	        add_city()
-    	        continue 
-    	        
-    	    else:
-    	        break
-    elif opt1 == 2:
-        while (True):
-            state_cityDict = {key: value for key in states for value in cities}
-            myDict = {key: value for key in countries for value in state_cityDict}
-            print(myDict)
-            print('''
+			opt2 = int(input("Select any option what do you want(1 to 4) : "))
+			if opt2 == 1: 
+				add_country()
+				continue 
+			elif opt2 == 2:
+				add_state()
+				continue 
+			elif opt2 == 3:
+				add_city()
+				continue 
+			else:
+				break
+	elif opt1 == 2:
+		while (True):
+			state_cityDict = {key: value for key in states for value in cities}
+			myDict = {key: value for key in countries for value in state_cityDict}
+			print(myDict)
+			print('''
     	    1. Do you want to Update countries
     	    2. Do you want to Update states
     	    3. Do you want to Update cities
     	    3. Exit\n''')
-            opt3 = int(input("Select any option what do you want(1 to 4) : "))
-    	    if opt3 == 1:
-    	    	update_country()
-    	    	continue 
-    	    	    
-    	    elif opt3 == 2:
-    	    	update_state()
-    	    	continue 
-    	    	
-    	    elif opt3 == 3:
-    	    	update_state()
-    	    	continue 
-    	    	
-    	    else:
-    	    	break
-    elif opt1 == 3:
-    	while (True):
-    	    state_cityDict = {key: value for key in states for value in cities}
-    	    myDict = {key: value for key in countries for value in state_cityDict}
-    	    print(myDict)
-    	    print('''
+			opt3 = int(input("Select any option what do you want(1 to 4) : "))
+			if opt3 == 1:
+				update_country()
+				continue 
+			elif opt3 == 2:
+				update_state()
+				continue 
+			elif opt3 == 3:
+				update_state()
+				continue 
+			else:
+				break
+	elif opt1 == 3:
+		while (True):
+			state_cityDict = {key: value for key in states for value in cities}
+			myDict = {key: value for key in countries for value in state_cityDict}
+			print(myDict)
+			print('''
     	    1. Do you want to Delete countries
     	    2. Do you want to Delete states
     	    3. Do you want to Delete cities
     	    3. Exit\n''')
-    	    opt4 = int(input("Select any option what do you want(1 to 4) : "))
-    	    	if opt4 == 1:
-    	    	    remove_country()
-    	    	    continue 
-    	    	    
-    	    	elif opt4 == 2:
-    	    	    remove_state()
-    	    	    continue 
-    	    	
-    	    	elif opt4 == 3:
-    	    	    remove_state()
-    	    	    continue 
-    	    	
-    	    	else:
-    	    	    break
-    elif opt1 == 4:
-        break
-    else:
-        continue 
+			opt4 = int(input("Select any option what do you want(1 to 4) : "))
+			if opt4 == 1:
+				remove_country()
+				continue 
+			elif opt4 == 2:
+				remove_state()
+				continue
+			elif opt4 == 3:
+				remove_state()
+				continue 
+			else:
+				break
+	elif opt1 == 4:
+		break
+	else:
+		continue 
