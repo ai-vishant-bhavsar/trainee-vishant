@@ -5,7 +5,7 @@ def fun1(num):
 	global start
 	start = time.time()
 	print(start)
-	while(True): 
+	while (True):
 		print('''
 	1. Addition
 	2. Subtraction
@@ -29,49 +29,48 @@ def fun1(num):
 			print(f"{x} * {y} = {x*y}")
 		elif opt == 4:
 			x = num()
-			while(True):
+			while (True):
 				y = num()
 				if y > 0:
-					break 
+					break
 				else:
 					print("Invalid input!")
-					continue 
+					continue
 			print(f"{x} / {y} = {x/y}")
 		elif opt == 5:
 			x = num()
-			while(True):
+			while (True):
 				y = num()
 				if y > 0:
-					break 
+					break
 				else:
 					print("Invalid input!")
-					continue 
+					continue
 			print(f"{x} % {y} = {x%y}")
 		elif opt == 6:
 			x = num()
-			while(True):
+			while (True):
 				y = num()
 				if y > 0:
-					break 
+					break
 				else:
 					print("Invalid input!")
-					continue 
+					continue
 			print(f"{x} // {y} = {x//y}")
 		elif opt == 7:
 			end = time.time()
-			break 
+			break
 		else:
 			print("Invalid input!")
-			continue 
+			continue
 
 
 @fun1
 def num():
 	x = int(input("Enter a value: "))
 	return x
-	
-	
+
+
 end = time.time()
 print(end)
-
 print(end - start)
