@@ -111,7 +111,7 @@ while (True):
 	elif opt1 == 2:
 		while (True):
 			state_cityDict = {key: value for key in states for value in cities}
-			myDict = {key: value for key in countries for value in state_cityDict}
+			myDict = {countries[i] : {key:value} for i, (key,value) in enamurate(state_cityDict.items())}
 			print(myDict)
 			print('''
 	1. Do you want to Update countries
@@ -133,7 +133,7 @@ while (True):
 	elif opt1 == 3:
 		while (True):
 			state_cityDict = {key: value for key in states for value in cities}
-			myDict = {key: value for key in countries for value in state_cityDict}
+			myDict = {countries[i] : {key:value} for i, (key,value) in enamurate(state_cityDict.items())}
 			print(myDict)
 			print('''
 	1. Do you want to Delete countries
