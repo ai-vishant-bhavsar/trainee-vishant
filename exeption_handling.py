@@ -59,7 +59,7 @@ def add_city():
 		for i in range(num_cities):
 			while (True):
 				city = input("Enter name of city : ")
-				if citty.isalpha():
+				if city.isalpha():
 					break
 				else:
 					continue
