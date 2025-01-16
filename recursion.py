@@ -23,4 +23,7 @@ Diractory = {
 
 sr_fname = str(input("Enter a file name that you want to search : "))
 print(f"File {sr_fname} is found on this location : ",end='')
-print(*search(Diractory, sr_fname))
+try:
+	print(*search(Diractory, sr_fname))
+except TypeError:
+	print("File not found!!!")
