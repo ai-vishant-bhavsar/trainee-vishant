@@ -1,5 +1,6 @@
 import random as r
 import pandas as pd
+from openpyxl.workbook import Workbook
 import os
 
 excel_file = "Banking System.xlsx"
@@ -162,7 +163,7 @@ class account_operations(account_details):
                     print(f"Succesfully deposited {amount} into account {account_number}.")
                     opt = str(input("Do you want to show account balance(Y/N):"))
                     if opt == 'Y':
-                        print(f"New Balance: {df.at[account_index, "Balance"]}")
+                        print(f"New Balance: {df.at[account_index, 'Balance']}")
                 elif transaction_type == "withdraw":
                     account_type = df.at[account_index, "Account Type"]
                     current_balance = df.at[account_index, "Balance"]
@@ -172,7 +173,7 @@ class account_operations(account_details):
                             print(f"Successfully withdrew {amount} form account {account_number}.")
                             opt = str(input("Do you want to show account balance(Y/N):"))
                             if opt == 'Y':
-                                print(f"New Balance: {df.at[account_index, "Balance"]}")
+                                print(f"New Balance: {df.at[account_index, 'Balance']}")
                         else:
                             print(f"Insufficient balance to the withdrawal.")
                 else:
@@ -227,24 +228,24 @@ while True:
     4. Withdraw money
     5. View all the accounts(Admin only)
     6. Apply interest to all saving accounts (Admin only)
-    3. Exit''')
+    7. Exit''')
 
-    opt = int(input("Enter a number(1, 2): "))
+    opt = int(input("Enter a number(1 to 6): "))
     if opt == 1:
         acc = account_operations()
         acc.add_account()
         continue
-    if opt == 2:
+    elif opt == 2:
         account_number = str(input("Enter your 14 digit account number: "))
         validate_account(account_number)
         continue
-    if opt == 3:
+    elif opt == 3:
         account_number = str(input("Enter your 14 digit account number: "))
         amount = float(input("Enter the amount you want to deposit: "))
         acc = account_operations()
         acc.transaction("deposit", account_number, amount)
         continue
-    if opt == 4:
+    elif opt == 4:
         account_number = str(input("Enter your 14 digit account number: "))
         amount = float(input("Enter the amount you want to deposit: "))
         acc = account_operations()
