@@ -35,7 +35,6 @@ def remove_country():
         print(f"{country} does not exist in the country list.")
         return
     countries.remove(country)
-    # Remove related states and cities
     states[:] = [state for state in states if state[0] != country]
     cities[:] = [city for city in cities if city[0] != country]
     print(f"{country} removed successfully!")
@@ -163,10 +162,24 @@ def remove_city():
     print(f"{city} removed successfully!")
 
 def print_all_data():
-    print("\nCurrent Data: ")
-    print("Countries: ", countries)
-    print("States: ", [f"{state_info[0]}: {state_info[1]}" for state_info in states])
-    print("Cities: ", [f"{city_info[0]}, {city_info[1]}: {city_info[2]}" for city_info in cities])
+    print("\nCurrent Data:")
+    
+    for country in countries:
+        print(f"{country}:")
+        country_states = [state_info[1] for state_info in states if state_info[0] == country]
+        
+        if country_states:
+            for state in country_states:
+                print(f"    {state}:")
+                state_cities = [city_info[2] for city_info in cities if city_info[0] == country and city_info[1] == state]
+                
+                if state_cities:
+                    for city in state_cities:
+                        print(f"        {city}")
+                else:
+                    print(f"        No cities added")
+        else:
+            print(f"    No states added")
 
 while True:
     print('''
