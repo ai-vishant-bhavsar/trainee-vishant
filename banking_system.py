@@ -53,14 +53,14 @@ def admin_login():
 
 def apply_interest_to_saving_account():
     df = load_form_excel()
-    for index, row in df.iterrow():
+    for index, row in df.iterrows():
         interest_rate = row["Interest Rate"]
         if interest_rate > 0:
             balance = row["Balance"]
             interest = balance * interest_rate
             df.at[index, "Balance"] += interest
             print(f"Interest of {interest} applied to account {row['Account Number']}")
-    save_to_excel()
+    save_to_excel(df)
 
 
 def account_number_generator(acc_type):
@@ -83,7 +83,7 @@ def account_number_generator(acc_type):
 
 
 class personal_details:
-    def _init_(self):
+    def __init__(self):
         self.fname = str(input("Enter your first name: "))
         self.mname = str(input("Enter your middle name: "))
         self.lname = str(input("Enter your last name: "))
@@ -93,7 +93,7 @@ class personal_details:
 
 
 class account_details(personal_details):
-    def _init_(self):
+    def __init__(self):
         super()._init_()
         self.account_type = str(input("Enter account type(saving/current): "))
         self.account_number = account_number_generator(self.account_type)
