@@ -100,7 +100,9 @@ class account_details(personal_details):
 class account_operations(account_details):
     def add_account(self):
         acc_holder_name = f"{self.fname} {self.mname} {self.lname}"
+        acc_number = account_number_generator(self.account_type)
         account = {
+            "Account Number": acc_number,
             "Name": acc_holder_name,
             "Mobile Number": self.mo_number,
             "Email": self.email,
@@ -110,7 +112,8 @@ class account_operations(account_details):
             "ISFC Code": self.ISFC_code,
             "Branch Name": self.branch_name,
             "Branch Address": self.branch_address,
-            "Interest Rate": self.intrest_rate
+            "Interest Rate": self.intrest_rate,
+            "Balance": self.balance
         }
 
         df = load_form_excel()
@@ -195,12 +198,11 @@ def display_all_account():
     df = load_form_excel()
     print("\n All Accounts: ")
     for index, row in df.iterrows():
-        print(f"\nAccount number= {row['Account Number']}")
         for col in df.columns:
             if col == "PIN":
-                print(f"{col}            : ****")
+                print(f"{col}\t: ****")
             else:
-                print(f"{col}            : {row[col]}")
+                print(f"{col}\t: {row[col]}")
 
 
 initialized_excel()
