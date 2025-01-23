@@ -11,7 +11,6 @@ admin_password = "Vish@nt1508"
 
 MINIMUM_BALANCE_CURRENT_ACCOUNT = 5000
 
-
 def initialized_excel():
     if not os.path.exists(excel_file):
         df = pd.DataFrame(columns=["Account Number", "Name", "Mobile Number",
@@ -22,7 +21,6 @@ def initialized_excel():
     else:
         print("Excel file already exists.")
 
-
 def load_form_excel():
     if os.path.exists(excel_file):
         df = pd.read_excel(excel_file)
@@ -31,25 +29,22 @@ def load_form_excel():
         return pd.DataFrame(columns=["Account Number", "Name", "Mobile Number",
                                      "Email", "Address", "Account Type", "ISFC code",
                                      "Branch Name", "Branch Address", "PIN", "Balance"])
-        
 
 def save_to_excel(df):
     df.to_excel(excel_file, index=False)
     print("Data saved to Excel file.")
 
-
 def admin_login():
     print("\n Admin login: ")
-    username = str(input("Enter admin username: "))
-    password = str(input("Enter admin userpassword: "))
-    
-    if username == admin_username and password == admin_password:
-        print("Admin login successful!")
-        return True
-    else:
-        print("Invalid credentials. Access denied.")
-        return False
+    while True:
+        username = str(input("Enter admin username: "))
+        password = str(input("Enter admin password: "))
 
+        if username == admin_username and password == admin_password:
+            print("Admin login successful!")
+            return True
+        else:
+            print("Invalid credentials. Access denied. Try again.")
 
 def apply_interest_to_saving_account():
     df = load_form_excel()
@@ -62,7 +57,6 @@ def apply_interest_to_saving_account():
             print(f"Interest of {interest} applied to account {row['Account Number']}")
     save_to_excel(df)
 
-
 def account_number_generator(acc_type):
     while True:
         account_number = [5, 0, 4, 0, 5, 7, 0, 5, 3]
@@ -72,15 +66,12 @@ def account_number_generator(acc_type):
             account_number.append(1)
         elif acc_type == 'current':
             account_number.append(0)
-        
+
         account_number_str = ''.join(map(str, account_number))
 
         if account_number_str not in used_account_numbers:
             used_account_numbers.add(account_number_str)
             return account_number_str
-        else:
-            return account_number_generator(acc_type)
-
 
 class personal_details:
     def __init__(self):
@@ -91,13 +82,12 @@ class personal_details:
         self.email = str(input("Enter your email address: "))
         self.address = str(input("Enter your address: "))
 
-
 class account_details(personal_details):
     def __init__(self):
-        super()._init_()
+        super().__init__()
         self.account_type = str(input("Enter account type(saving/current): "))
         self.account_number = account_number_generator(self.account_type)
-        self.account_pin = str(input("Create yout 4 digit pin: "))
+        self.account_pin = str(input("Create your 4-digit pin: "))
         self.ISFC_code = "HDFC57053"
         self.branch_name = "Ahmedabad"
         self.branch_address = "Sindhubhavan road, Ahmedabad"
@@ -109,30 +99,25 @@ class account_details(personal_details):
 
 class account_operations(account_details):
     def add_account(self):
-        super()._init_()
         acc_holder_name = f"{self.fname} {self.mname} {self.lname}"
-        
         account = {
             "Name": acc_holder_name,
             "Mobile Number": self.mo_number,
             "Email": self.email,
             "Address": self.address,
             "Account Type": self.account_type,
-            "Account PIN" : self.account_pin,
+            "Account PIN": self.account_pin,
             "ISFC Code": self.ISFC_code,
             "Branch Name": self.branch_name,
             "Branch Address": self.branch_address,
-            "Interest Ratr": self.intrest_rate
+            "Interest Rate": self.intrest_rate
         }
-        
+
         df = load_form_excel()
-        
-        df = df.append(account, ignore_index=True)
-        
+        df = pd.concat([df, pd.DataFrame([account])], ignore_index=True)
         save_to_excel(df)
-        print(f"{self.fname} {self.lname} your accout is created successfully.")
-        
-    
+        print(f"{self.fname} {self.lname}, your account is created successfully.")
+
     def calculate_interest(self, account_number):
         df = load_form_excel()
         if account_number in df["Account Number"].values:
@@ -140,7 +125,7 @@ class account_operations(account_details):
             account_type = df.at[account_index, "Account Type"]
             interest_rate = df.at[account_index, "Interest Rate"]
             balance = df.at[account_index, "Balance"]
-            
+
             if account_type == "saving" and interest_rate > 0:
                 interest = balance * interest_rate
                 df.at[account_index, "Balance"] += interest
@@ -150,18 +135,17 @@ class account_operations(account_details):
                 print("No interest applicable for this account type")
         else:
             print("Account number not found.")
-    
-    
+
     def transaction(self, transaction_type, account_number, amount):
         df = load_form_excel()
         if account_number in df["Account Number"].values:
-            account_index = df[df["Account Number"] == account_number.index[0]]
-            pin = str(input("Enter you PIN: "))
+            account_index = df[df["Account Number"] == account_number].index[0]
+            pin = str(input("Enter your PIN: "))
             if pin == df.at[account_index, "PIN"]:
                 if transaction_type == "deposit":
                     df.at[account_index, "Balance"] += amount
-                    print(f"Succesfully deposited {amount} into account {account_number}.")
-                    opt = str(input("Do you want to show account balance(Y/N):"))
+                    print(f"Successfully deposited {amount} into account {account_number}.")
+                    opt = str(input("Do you want to show account balance (Y/N):"))
                     if opt == 'Y':
                         print(f"New Balance: {df.at[account_index, 'Balance']}")
                 elif transaction_type == "withdraw":
@@ -170,17 +154,17 @@ class account_operations(account_details):
                     if account_type == "current":
                         if current_balance - amount >= MINIMUM_BALANCE_CURRENT_ACCOUNT:
                             df.at[account_index, "Balance"] -= amount
-                            print(f"Successfully withdrew {amount} form account {account_number}.")
-                            opt = str(input("Do you want to show account balance(Y/N):"))
+                            print(f"Successfully withdrew {amount} from account {account_number}.")
+                            opt = str(input("Do you want to show account balance (Y/N):"))
                             if opt == 'Y':
                                 print(f"New Balance: {df.at[account_index, 'Balance']}")
                         else:
-                            print(f"Insufficient balance to the withdrawal.")
+                            print(f"Insufficient balance to withdraw.")
                 else:
                     print("Invalid transaction type.")
                 save_to_excel(df)
             else:
-                print("Inwalid PIN. Transaction Denied.") 
+                print("Invalid PIN. Transaction Denied.")
         else:
             print("Account number not found.")
 
