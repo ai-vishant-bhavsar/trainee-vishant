@@ -24,7 +24,6 @@ def load_from_excel():
         df.to_excel(file_path, index=False)
         print(f"Created Excel file {file_path}")
 
-
 def get_valid_input(prompt: str) -> str:
     while True:
         value = input(prompt).strip()
@@ -41,6 +40,7 @@ def get_valid_number(prompt: str) -> int:
             print("Please enter a valid number greater than 0.")
         except ValueError:
             print("Invalid input! Please enter a valid number.")
+
 
 def add_entry(type_: str, parent: str = None) -> None:
     if type_ == "country":
@@ -75,6 +75,64 @@ def add_entry(type_: str, parent: str = None) -> None:
             city = get_valid_input(f"Enter the name of the city in {state}, {country}: ")
             if city not in data[country][state]:
                 data[country][state].append(city)
+
+
+def update_entry(type_: str):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            parent = kwargs.get('parent')
+            if type_ == "country":
+                if parent not in data:
+                    print(f"{parent} does not exist. Add the country first.")
+                    return
+            elif type_ == "state":
+                country = kwargs.get('country')
+                if country not in data:
+                    print(f"{country} does not exist. Add the country first.")
+                    return
+                if parent not in data[country]:
+                    print(f"{parent} does not exist in {country}. Add the state first.")
+                    return
+            elif type_ == "city":
+                country = kwargs.get('country')
+                state = kwargs.get('state')
+                if country not in data:
+                    print(f"{country} does not exist. Add the country first.")
+                    return
+                if state not in data[country]:
+                    print(f"{state} does not exist in {country}. Add the state first.")
+                    return
+                if parent not in data[country][state]:
+                    print(f"{parent} does not exist in {state}, {country}. Add the city first.")
+                    return
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@update_entry("country")
+def update_country(parent: str):
+    new_name = get_valid_input(f"Enter the new name for the country {parent}: ")
+    if new_name not in data:
+        data[new_name] = data.pop(parent)
+        print(f"{parent} has been updated to {new_name}.")
+    else:
+        print(f"{new_name} already exists. Update failed.")
+
+@update_entry("state")
+def update_state(country: str, parent: str):
+    new_state = get_valid_input(f"Enter the new name for the state {parent}: ")
+    if new_state not in data[country]:
+        data[country][new_state] = data[country].pop(parent)
+        print(f"{parent} has been updated to {new_state}.")
+    else:
+        print(f"{new_state} already exists in {country}. Update failed.")
+
+@update_entry("city")
+def update_city(country: str, state: str, parent: str):
+    new_city = get_valid_input(f"Enter the new name for the city {parent}: ")
+    data[country][state][data[country][state].index(parent)] = new_city
+    print(f"{parent} has been updated to {new_city}.")
+
 
 def remove_entry(type_: str, parent: str = None) -> None:
     if type_ == "country":
@@ -111,6 +169,7 @@ def remove_entry(type_: str, parent: str = None) -> None:
         else:
             print(f"{country} does not exist.")
 
+
 def print_all_data() -> None:
     if not data:
         print("No data available.")
@@ -119,6 +178,7 @@ def print_all_data() -> None:
         print(f"\n{country}:")
         for state, cities in states.items():
             print(f"  {state}: {', '.join(cities) if cities else 'No cities added'}")
+
 
 def save_to_excel():
     countries = []
@@ -135,10 +195,31 @@ def save_to_excel():
     df.to_excel(file_path, index=False)
 
 
+def save_to_csv():
+    countries = []
+    for country, states in data.items():
+        for state, cities in states.items():
+            for i, city in enumerate(cities):
+                if i == 0:
+                    countries.append([country, state, city])
+                else:
+                    countries.append(["", state, city])
+
+    df = pd.DataFrame(countries, columns=["Country", "State", "City"])
+    file_path = "locations_data.csv"
+    df.to_csv(file_path, index=False)
+    print(f"Data has been saved to {file_path} successfully.")
+
+
+def save_to_excel_and_csv():
+    save_to_excel()   
+    save_to_csv()     
+
+
 load_from_excel()
 
 while True:
-    print('''
+    print('''\n
 1. Add
 2. Update
 3. Delete
@@ -165,18 +246,45 @@ while True:
                 continue
             if opt2 == 1:
                 add_entry("country")
-                save_to_excel()
+                save_to_excel_and_csv()
             elif opt2 == 2:
                 add_entry("state")
-                save_to_excel()
+                save_to_excel_and_csv()
             elif opt2 == 3:
                 add_entry("city")
-                save_to_excel()
+                save_to_excel_and_csv()
             else:
                 break
     
     elif opt1 == 2:
-        print("Update feature is not implemented in this version.")
+        print('''\n
+1. Update Country
+2. Update State
+3. Update City
+4. Exit''')
+        try:
+            opt2 = int(input("Select an option: "))
+        except ValueError:
+            print("Invalid input! Please enter a number.")
+            continue
+
+        if opt2 == 1:
+            country = get_valid_input("Enter the country to update: ")
+            update_country(parent=country)
+            save_to_excel_and_csv()
+        elif opt2 == 2:
+            country = get_valid_input("Enter the country for the state: ")
+            state = get_valid_input(f"Enter the state to update in {country}: ")
+            update_state(country=country, parent=state)
+            save_to_excel_and_csv()
+        elif opt2 == 3:
+            country = get_valid_input("Enter the country for the city: ")
+            state = get_valid_input(f"Enter the state for the city in {country}: ")
+            city = get_valid_input(f"Enter the city to update in {state}, {country}: ")
+            update_city(country=country, state=state, parent=city)
+            save_to_excel_and_csv()
+        else:
+            break
     
     elif opt1 == 3:
         while True:
@@ -192,13 +300,13 @@ while True:
                 continue
             if opt4 == 1:
                 remove_entry("country")
-                save_to_excel()  # Automatically save after removing
+                save_to_excel_and_csv()
             elif opt4 == 2:
                 remove_entry("state")
-                save_to_excel()  # Automatically save after removing
+                save_to_excel_and_csv()
             elif opt4 == 3:
                 remove_entry("city")
-                save_to_excel()  # Automatically save after removing
+                save_to_excel_and_csv()
             else:
                 break
     
