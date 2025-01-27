@@ -5,24 +5,35 @@ from collections import defaultdict
 data = defaultdict(lambda: defaultdict(list))
 
 def load_from_excel():
-    file_path = "country_state_city_excel.xlsx"
-    
+    file_path = "locations_data.xlsx"
+
     if os.path.exists(file_path):
         df = pd.read_excel(file_path)
+        
+        # Loop through rows and load data into the dictionary
         for _, row in df.iterrows():
             country = row['Country']
             state = row['State']
             city = row['City']
-            
+
+            # Handle cases where state or city are NaN or empty
+            if pd.isna(state) or state == "":  # If no state, use country name
+                state = country
+            if pd.isna(city) or city == "":  # If no city, use state name
+                city = state
+
             if country and state and city:
                 data[country][state].append(city)
             elif country and state:
-                data[country][state]  
+                data[country][state]  # Ensure at least the state exists
+            elif country:
+                data[country]  # Ensure at least the country exists
     else:
         print("No existing Excel file found, creating a new one with headers.")
         df = pd.DataFrame(columns=["Country", "State", "City"])
         df.to_excel(file_path, index=False)
         print(f"Created Excel file {file_path}")
+
 
 def get_valid_input(prompt: str) -> str:
     while True:
