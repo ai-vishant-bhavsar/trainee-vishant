@@ -4,30 +4,28 @@ from collections import defaultdict
 
 data = defaultdict(lambda: defaultdict(list))
 
+
 def load_from_excel():
-    file_path = "locations_data.xlsx"
+    file_path = "country_state_city_excel.xlsx"
 
     if os.path.exists(file_path):
         df = pd.read_excel(file_path)
-        
-        # Loop through rows and load data into the dictionary
         for _, row in df.iterrows():
             country = row['Country']
             state = row['State']
             city = row['City']
 
-            # Handle cases where state or city are NaN or empty
-            if pd.isna(state) or state == "":  # If no state, use country name
-                state = country
-            if pd.isna(city) or city == "":  # If no city, use state name
-                city = state
+            if pd.isna(state) or state == "":
+                state = ''
+            if pd.isna(city) or city == "":
+                city = ''
 
             if country and state and city:
                 data[country][state].append(city)
             elif country and state:
-                data[country][state]  # Ensure at least the state exists
+                data[country][state]
             elif country:
-                data[country]  # Ensure at least the country exists
+                data[country]
     else:
         print("No existing Excel file found, creating a new one with headers.")
         df = pd.DataFrame(columns=["Country", "State", "City"])
@@ -41,6 +39,7 @@ def get_valid_input(prompt: str) -> str:
         if value.isalpha():
             return value
         print("Invalid input, please enter a valid name.")
+
 
 def get_valid_number(prompt: str) -> int:
     while True:
@@ -60,11 +59,14 @@ def add_entry(type_: str, parent: str = None) -> None:
             country = get_valid_input("Enter the name of the country: ")
             if country not in data:
                 data[country]
+            else:
+                print(f"{country} is alredy exists")
+                add_entry("country")
     elif type_ == "state":
         country = get_valid_input("Enter the country for the state: ")
         if country not in data:
             print(f"{country} does not exist. Add country first.")
-            return
+            return add_entry("country")
         num_entries = get_valid_number(f"How many states do you want to add to {country}? ")
         for _ in range(num_entries):
             state = get_valid_input(f"Enter the name of the state in {country}: ")
@@ -72,20 +74,24 @@ def add_entry(type_: str, parent: str = None) -> None:
                 data[country][state]
             else:
                 print(f"{state} already exists in {country}.")
+                add_entry("state")
     elif type_ == "city":
         country = get_valid_input("Enter the country for the city: ")
         if country not in data:
             print(f"{country} does not exist. Add country first.")
-            return
+            return add_entry("country")
         state = get_valid_input(f"Enter the state for the city in {country}: ")
         if state not in data[country]:
             print(f"{state} does not exist in {country}. Add state first.")
-            return
+            return add_entry("state")
         num_entries = get_valid_number(f"How many cities do you want to add to {state}, {country}? ")
         for _ in range(num_entries):
             city = get_valid_input(f"Enter the name of the city in {state}, {country}: ")
             if city not in data[country][state]:
                 data[country][state].append(city)
+            else:
+                print(f"{city} is alrady exists in the {country} in {state}.")
+                return add_entry("city")
 
 
 def update_entry(type_: str):
@@ -117,8 +123,11 @@ def update_entry(type_: str):
                     print(f"{parent} does not exist in {state}, {country}. Add the city first.")
                     return
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
+
 
 @update_entry("country")
 def update_country(parent: str):
@@ -129,6 +138,7 @@ def update_country(parent: str):
     else:
         print(f"{new_name} already exists. Update failed.")
 
+
 @update_entry("state")
 def update_state(country: str, parent: str):
     new_state = get_valid_input(f"Enter the new name for the state {parent}: ")
@@ -137,6 +147,7 @@ def update_state(country: str, parent: str):
         print(f"{parent} has been updated to {new_state}.")
     else:
         print(f"{new_state} already exists in {country}. Update failed.")
+
 
 @update_entry("city")
 def update_city(country: str, state: str, parent: str):
@@ -193,38 +204,33 @@ def print_all_data() -> None:
 
 def save_to_excel():
     countries = []
-    seen_combinations = set()  # A set to keep track of unique combinations of (country, state, city)
+    seen_combinations = set()
 
-    # Loop through all countries and their states and cities
     for country, states in data.items():
-        if not states:  # If there are no states for this country
+        if not states:
             combination = (country, "", "")
             if combination not in seen_combinations:
-                countries.append([country, "", ""])  # Add country with empty state and city
+                countries.append([country, "", ""])
                 seen_combinations.add(combination)
         else:
             for state, cities in states.items():
-                if not cities:  # If there are no cities for this state
+                if not cities:
                     combination = (country, state, "")
                     if combination not in seen_combinations:
-                        countries.append([country, state, ""])  # Add state with empty city
+                        countries.append([country, state, ""])
                         seen_combinations.add(combination)
                 else:
                     for city in cities:
                         combination = (country, state, city)
                         if combination not in seen_combinations:
-                            countries.append([country, state, city])  # Add state and city
-                            seen_combinations.add(combination)
+                            countries.append([country, state, city])
 
-    # Create a DataFrame from the list of countries, states, and cities
     df = pd.DataFrame(countries, columns=["Country", "State", "City"])
-    
-    # Save to Excel file
-    file_path = "locations_data.xlsx"
+
+    file_path = "country_state_city_excel.xlsx"
     df.to_excel(file_path, index=False)
 
     print(f"Data has been saved to {file_path} successfully.")
-
 
 
 def save_to_csv():
@@ -238,14 +244,13 @@ def save_to_csv():
                     countries.append(["", state, city])
 
     df = pd.DataFrame(countries, columns=["Country", "State", "City"])
-    file_path = "locations_data.csv"
+    file_path = "country_state_city_excel.csv"
     df.to_csv(file_path, index=False)
-    print(f"Data has been saved to {file_path} successfully.")
 
 
 def save_to_excel_and_csv():
-    save_to_excel()   
-    save_to_csv()     
+    save_to_excel()
+    save_to_csv()
 
 
 load_from_excel()
@@ -262,7 +267,7 @@ while True:
     except ValueError:
         print("Invalid input! Please enter a number.")
         continue
-    
+
     if opt1 == 1:
         while True:
             print_all_data()
@@ -287,7 +292,7 @@ while True:
                 save_to_excel_and_csv()
             else:
                 break
-    
+
     elif opt1 == 2:
         print('''\n
 1. Update Country
@@ -317,7 +322,7 @@ while True:
             save_to_excel_and_csv()
         else:
             break
-    
+
     elif opt1 == 3:
         while True:
             print('''\n
@@ -341,10 +346,10 @@ while True:
                 save_to_excel_and_csv()
             else:
                 break
-    
+
     elif opt1 == 4:
         print_all_data()
-    
+
     elif opt1 == 5:
         print("Exiting the program...")
         break
