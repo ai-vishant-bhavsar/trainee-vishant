@@ -182,17 +182,38 @@ def print_all_data() -> None:
 
 def save_to_excel():
     countries = []
-    for country, states in data.items():
-        for state, cities in states.items():
-            for i, city in enumerate(cities):
-                if i == 0:
-                    countries.append([country, state, city])
-                else:
-                    countries.append(["", state, city])
+    seen_combinations = set()  # A set to keep track of unique combinations of (country, state, city)
 
+    # Loop through all countries and their states and cities
+    for country, states in data.items():
+        if not states:  # If there are no states for this country
+            combination = (country, "", "")
+            if combination not in seen_combinations:
+                countries.append([country, "", ""])  # Add country with empty state and city
+                seen_combinations.add(combination)
+        else:
+            for state, cities in states.items():
+                if not cities:  # If there are no cities for this state
+                    combination = (country, state, "")
+                    if combination not in seen_combinations:
+                        countries.append([country, state, ""])  # Add state with empty city
+                        seen_combinations.add(combination)
+                else:
+                    for city in cities:
+                        combination = (country, state, city)
+                        if combination not in seen_combinations:
+                            countries.append([country, state, city])  # Add state and city
+                            seen_combinations.add(combination)
+
+    # Create a DataFrame from the list of countries, states, and cities
     df = pd.DataFrame(countries, columns=["Country", "State", "City"])
+    
+    # Save to Excel file
     file_path = "locations_data.xlsx"
     df.to_excel(file_path, index=False)
+
+    print(f"Data has been saved to {file_path} successfully.")
+
 
 
 def save_to_csv():
