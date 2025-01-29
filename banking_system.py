@@ -82,23 +82,6 @@ def apply_interest_to_saving_account():
     save_to_excel(df)
 
 
-def account_number_generator(acc_type):
-    while True:
-        account_number = [5, 0, 4, 0, 5, 7, 0, 5, 3]
-        for i in range(0, 3):
-            account_number.append(r.randint(0, 9))
-        if acc_type == 'saving':
-            account_number.append(1)
-        elif acc_type == 'current':
-            account_number.append(0)
-
-        account_number_str = ''.join(map(str, account_number))
-
-        if account_number_str not in used_account_numbers:
-            used_account_numbers.add(account_number_str)
-            return account_number_str
-
-
 class personal_details:
     def __init__(self):
         self.fname = get_valid_input("Enter your first name: ")
