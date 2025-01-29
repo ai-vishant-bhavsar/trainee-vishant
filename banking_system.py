@@ -1,6 +1,5 @@
 import random as r
 import pandas as pd
-from openpyxl.workbook import Workbook
 import os
 
 excel_file = "Banking System.xlsx"
@@ -29,13 +28,32 @@ def load_form_excel():
         return df
     else:
         return pd.DataFrame(columns=["Account Number", "Name", "Mobile Number",
-                                     "Email", "Address", "Account Type", "IFSC code",
-                                     "Branch Name", "Branch Address", "Account PIN", "Balance"])
+                                   "Email", "Address", "Account Type", "IFSC code",
+                                   "Branch Name", "Branch Address", "Account PIN", "Balance"])
 
 
 def save_to_excel(df):
     df.to_excel(excel_file, index=False)
     print("Data saved to Excel file.")
+
+
+def get_valid_input(prompt: str) -> str:
+    while True:
+        value = input(prompt).strip()
+        if value.isalpha():
+            return value
+        print("Invalid input, please enter a valid name.")
+
+
+def get_valid_number(prompt: str) -> int:
+    while True:
+        try:
+            num = int(input(prompt))
+            if num > 0:
+                return num
+            print("Please enter a valid number greater than 0.")
+        except ValueError:
+            print("Invalid input! Please enter a valid number.")
 
 
 def admin_login():
@@ -49,6 +67,7 @@ def admin_login():
             return True
         else:
             print("Invalid credentials. Access denied. Try again.")
+            continue
 
 
 def apply_interest_to_saving_account():
@@ -82,10 +101,16 @@ def account_number_generator(acc_type):
 
 class personal_details:
     def __init__(self):
-        self.fname = str(input("Enter your first name: "))
-        self.mname = str(input("Enter your middle name: "))
-        self.lname = str(input("Enter your last name: "))
-        self.mo_number = str(input("Enter your mobile number: "))
+        self.fname = get_valid_input("Enter your first name: ")
+        self.mname = get_valid_input("Enter your middle name: ")
+        self.lname = get_valid_input("Enter your last name: ")
+        while True:
+            self.mo_number = get_valid_number("Enter your mobile number: ")
+            if 10 > len(str(self.mo_number)):
+                print("Enter a valid number")
+                continue
+            else:
+                break
         self.email = str(input("Enter your email address: "))
         self.address = str(input("Enter your address: "))
 
@@ -93,9 +118,26 @@ class personal_details:
 class account_details(personal_details):
     def __init__(self):
         super().__init__()
-        self.account_type = str(input("Enter account type(saving/current): "))
-        self.account_number = account_number_generator(self.account_type)
-        self.account_pin = str(input("Create your 4-digit pin: "))
+        while True:
+            self.account_type = get_valid_input("Enter type of account (saving(s)/current(c)): ").lower()
+            if self.account_type == 's':
+                break
+            elif self.account_type == 'c':
+                break
+            else:
+                print("Invalid Input enter a valid input (saving(s)/current(c)")
+                continue
+        while True:
+            self.account_number = get_valid_number("Enter a 14 digit number: ")
+            if len(str(self.account_number)) == 14:
+                break
+            else:
+                print("Invalid number! please enter again")
+                if self.account_number in used_account_numbers:
+                    print("This account number is already exists enter another number")
+                continue
+
+        self.account_pin = get_valid_number("Create your 4-digit pin: ")
         self.IFSC_code = "HDFC57053"
         self.branch_name = "Ahmedabad"
         self.branch_address = "Sindhubhavan road, Ahmedabad"
@@ -108,17 +150,21 @@ class account_details(personal_details):
 
 class account_operations(account_details):
     def add_account(self):
+        global account_type
         acc_holder_name = f"{self.fname} {self.mname} {self.lname}"
-        acc_number = account_number_generator(self.account_type)
+        if self.account_type == 's':
+            account_type = 'saving'
+        else:
+            account_type = 'current'
         account = {
-            "Account Number": acc_number,
+            "Account Number": self.account_number,
             "Name": acc_holder_name,
             "Mobile Number": self.mo_number,
             "Email": self.email,
             "Address": self.address,
-            "Account Type": self.account_type,
+            "Account Type": account_type,
             "Account PIN": self.account_pin,
-            "IFSC Code": self.IFSC_code,
+            "IFSC code": self.IFSC_code,
             "Branch Name": self.branch_name,
             "Branch Address": self.branch_address,
             "Interest Rate": self.interest_rate,
@@ -131,41 +177,7 @@ class account_operations(account_details):
         print(f"{self.fname} {self.lname}, your account is created successfully.")
 
 
-# def calculate_interest(account_number):
-#     df = load_form_excel()
-#     if account_number.strip() in (df["Account Number"].astype(str)).values:
-#         account_index = df[df["Account Number"] == account_number].index[0]
-#         account_type = df.at[account_index, "Account Type"]
-#         interest_rate = df.at[account_index, "Interest Rate"]
-#         balance = df.at[account_index, "Balance"]
-#
-#         if account_type == "saving" and interest_rate > 0:
-#             interest = balance * interest_rate
-#             df.at[account_index, "Balance"] += interest
-#             print(f"Interest of {interest} has been added to your saving account.")
-#             save_to_excel(df)
-#         else:
-#             print("No interest applicable for this account type")
-#     else:
-#         print("Account number not found.")
 def calculate_interest():
-    def get_valid_input(prompt: str) -> str:
-        while True:
-            value = input(prompt).strip()
-            if value.isalpha():
-                return value
-            print("Invalid input, please enter a valid name.")
-
-    def get_valid_number(prompt: str) -> int:
-        while True:
-            try:
-                num = int(input(prompt))
-                if num > 0:
-                    return num
-                print("Please enter a valid number greater than 0.")
-            except ValueError:
-                print("Invalid input! Please enter a valid number.")
-
     type = get_valid_input("For which type of interest you want to calculate(Saving account/Fix deposits/Loans)")
     amount = get_valid_number("Enter amount:")
     year = get_valid_number("Enter a years: ")
@@ -199,14 +211,16 @@ def calculate_interest():
             interest = (amount * year * 24.14) / 100
             print(
                 f"if you apply loan for {amount} for {year} yeas then your interest is {interest} and the end you have to pay {amount + interest}")
+        else:
+            return False
 
 
 def transaction(transaction_type, account_number, amount):
     df = load_form_excel()
-    if account_number.strip() in (df["Account Number"].astype(str)).values:
-        account_index = df[df["Account Number"].astype(str) == account_number].index[0]
-        account_pin = str(input("Enter your PIN: "))
-        if account_pin.strip() == (df.at[account_index, "Account PIN"].astype(str)):
+    if account_number in (df["Account Number"].astype(int)).values:
+        account_index = df[df["Account Number"].astype(int) == account_number].index[0]
+        account_pin = get_valid_number("Enter your PIN: ")
+        if account_pin == (df.at[account_index, "Account PIN"].astype(int)):
             if transaction_type == "deposit":
                 df.at[account_index, "Balance"] += amount
                 print(f"Successfully deposited {amount} into account {account_number}.")
@@ -231,8 +245,7 @@ def transaction(transaction_type, account_number, amount):
                     if df.at[account_index, "Balance"] > 0:
                         print(f"Successfully withdrew {amount} from account {account_number}.")
                     else:
-                        print(
-                            f"Successfully withdrew {amount} from your account {account_number} and your overdraft is {abs(amount - cr_balance)} ")
+                        over_draft(account_number, amount, cr_balance)
                     opt = str(input("Do you want to show account balance (Y/N):"))
                     if opt == 'Y':
                         print(f"New Balance: {df.at[account_index, 'Balance']}")
@@ -242,19 +255,29 @@ def transaction(transaction_type, account_number, amount):
             save_to_excel(df)
         else:
             print("Invalid PIN. Transaction Denied.")
+            return False
     else:
         print("Account number not found.")
+        return False
 
+
+def over_draft(account_number, amount, cr_balance):
+    over_draft_opt = get_valid_input("You have no sufficient balance do you want to over draft? (Y/N): ").lower()
+    if over_draft_opt == 'y':
+        print(f"Successfully withdrew {amount} from your account {account_number} and your overdraft is {abs(amount - cr_balance)}.")
+    else:
+        print("Transaction successful.")
+        return True
 
 def validate_account(account_number):
     df = load_form_excel()
 
-    if account_number.strip() in (df["Account Number"].astype(str)).values:
+    if account_number in (df["Account Number"].astype(int)).values:
 
-        account_pin = str(input("Enter your PIN to access your account: "))
-        account_index = df[df["Account Number"].astype(str) == account_number].index[0]
+        account_pin = get_valid_number("Enter your PIN to access your account: ")
+        account_index = df[df["Account Number"].astype(int) == account_number].index[0]
 
-        if account_pin.strip() == (df.at[account_index, "Account PIN"].astype(str)):
+        if account_pin == (df.at[account_index, "Account PIN"].astype(int)):
             print("Account validated successfully!")
             print("\nYour Account Details: ")
             for col in df.columns:
@@ -262,7 +285,7 @@ def validate_account(account_number):
             return True
         else:
             print("Invalid PIN. Access denied.")
-            return True
+            return False
     else:
         print("Account number not found.")
         return False
@@ -297,16 +320,16 @@ while True:
         acc.add_account()
         continue
     elif opt == 2:
-        account_number = str(input("Enter your 14 digit account number: ")).strip()
+        account_number = get_valid_number("Enter your 14 digit account number: ")
         validate_account(account_number)
         continue
     elif opt == 3:
-        account_number = str(input("Enter your 14 digit account number: ")).strip()
+        account_number = get_valid_number("Enter your 14 digit account number: ")
         amount = float(input("Enter the amount you want to deposit: "))
         transaction("deposit", account_number, amount)
         continue
     elif opt == 4:
-        account_number = str(input("Enter your 14 digit account number: ")).strip()
+        account_number = get_valid_number("Enter your 14 digit account number: ")
         amount = float(input("Enter the amount you want to withdraw: "))
         transaction("withdraw", account_number, amount)
         continue
