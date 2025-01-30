@@ -2,12 +2,14 @@ from collections import defaultdict
 
 data = defaultdict(lambda: defaultdict(list))
 
+
 def get_valid_input(prompt: str) -> str:
     while True:
         value = input(prompt).strip()
         if value.isalpha():
             return value
         print("Invalid input, please enter a valid name.")
+
 
 def get_valid_number(prompt: str) -> int:
     while True:
@@ -18,6 +20,7 @@ def get_valid_number(prompt: str) -> int:
             print("Please enter a valid number greater than 0.")
         except ValueError:
             print("Invalid input! Please enter a valid number.")
+
 
 def add_entry(type_: str, parent: str = None) -> None:
     if type_ == "country":
@@ -52,6 +55,23 @@ def add_entry(type_: str, parent: str = None) -> None:
             city = get_valid_input(f"Enter the name of the city in {state}, {country}: ")
             if city not in data[country][state]:
                 data[country][state].append(city)
+
+
+def update_entry(type_: str, country=None, state=None, city=None):
+    def update_fn(country, state, city, new_name):
+        if type_ == "country" and new_name not in data:
+            data[new_name] = data.pop(country)
+        elif type_ == "state" and new_name not in data[country]:
+            data[country][new_name] = data[country].pop(state)
+        elif type_ == "city":
+            data[country][state][data[country][state].index(city)] = new_name
+        else:
+            print(f"{new_name} already exists in the same level.")
+        print_all_data()
+
+    new_name = get_valid_input(f"Enter new name for the {type_}: ")
+    update_fn(country, state, city, new_name)
+
 
 def remove_entry(type_: str, parent: str = None) -> None:
     if type_ == "country":
@@ -88,6 +108,7 @@ def remove_entry(type_: str, parent: str = None) -> None:
         else:
             print(f"{country} does not exist.")
 
+
 def print_all_data() -> None:
     if not data:
         print("No data available.")
@@ -96,6 +117,7 @@ def print_all_data() -> None:
         print(f"\n{country}:")
         for state, cities in states.items():
             print(f"  {state}: {', '.join(cities) if cities else 'No cities added'}")
+
 
 while True:
     print('''1. Add
@@ -108,7 +130,7 @@ while True:
     except ValueError:
         print("Invalid input! Please enter a number.")
         continue
-    
+
     if opt1 == 1:
         while True:
             print_all_data()
@@ -130,10 +152,21 @@ while True:
                 add_entry("city")
             else:
                 break
-    
+
     elif opt1 == 2:
-        print("Update feature is not implemented in this version.")
-    
+        print('''\n1. Update Country\n2. Update State\n3. Update City\n4. Exit''')
+        sub_choice = get_valid_input("Select an option: ")
+        if sub_choice == "1":
+            update_entry("country", get_valid_input("Enter country to update: "), None, None)
+        elif sub_choice == "2":
+            update_entry("state", get_valid_input("Enter country for the state: "),
+            get_valid_input("Enter state to update: "), None)
+        elif sub_choice == "3":
+            update_entry("city", get_valid_input("Enter country for city: "), get_valid_input("Enter state for city: "),
+            get_valid_input("Enter city to update: "))
+        else:
+            break
+
     elif opt1 == 3:
         while True:
             print('''\n
@@ -154,10 +187,10 @@ while True:
                 remove_entry("city")
             else:
                 break
-    
+
     elif opt1 == 4:
         print_all_data()
-    
+
     elif opt1 == 5:
         print("Exiting the program...")
         break
