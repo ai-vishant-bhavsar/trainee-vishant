@@ -82,6 +82,23 @@ def apply_interest_to_saving_account():
     save_to_excel(df)
 
 
+def account_number_generator(acc_type):
+    while True:
+        account_number = [5, 0, 4, 0, 5, 7, 0, 5, 3]
+        for i in range(0, 3):
+            account_number.append(r.randint(0, 9))
+        if acc_type == 'saving':
+            account_number.append(1)
+        elif acc_type == 'current':
+            account_number.append(0)
+
+        account_number_str = ''.join(map(str, account_number))
+
+        if account_number_str not in used_account_numbers:
+            used_account_numbers.add(account_number_str)
+            return account_number_str
+
+
 class personal_details:
     def __init__(self):
         self.fname = get_valid_input("Enter your first name: ")
@@ -125,7 +142,7 @@ class account_details(personal_details):
         self.branch_name = "Ahmedabad"
         self.branch_address = "Sindhubhavan road, Ahmedabad"
         self.balance = 2500.0
-        if self.account_type == "saving":
+        if self.account_type == "s":
             self.interest_rate = 0.03
         else:
             self.interest_rate = 0.0
@@ -158,7 +175,6 @@ class account_operations(account_details):
         df = pd.concat([df, pd.DataFrame([account])], ignore_index=True)
         save_to_excel(df)
         print(f"{self.fname} {self.lname}, your account is created successfully.")
-
 
 def calculate_interest():
     type = get_valid_input("For which type of interest you want to calculate(Saving account/Fix deposits/Loans)")
@@ -208,7 +224,7 @@ def transaction(transaction_type, account_number, amount):
                 df.at[account_index, "Balance"] += amount
                 print(f"Successfully deposited {amount} into account {account_number}.")
                 opt = str(input("Do you want to show account balance (Y/N):"))
-                if opt == 'Y':
+                if opt.lower() == 'y':
                     print(f"New Balance: {df.at[account_index, 'Balance']}")
             elif transaction_type == "withdraw":
                 account_type = df.at[account_index, "Account Type"]
@@ -218,7 +234,7 @@ def transaction(transaction_type, account_number, amount):
                         df.at[account_index, "Balance"] -= amount
                         print(f"Successfully withdrew {amount} from account {account_number}.")
                         opt = str(input("Do you want to show account balance (Y/N):"))
-                        if opt == 'Y':
+                        if opt.lower() == 'y':
                             print(f"New Balance: {df.at[account_index, 'Balance']}")
                     else:
                         print(f"Insufficient balance to withdraw.")
@@ -227,14 +243,27 @@ def transaction(transaction_type, account_number, amount):
                     df.at[account_index, "Balance"] -= amount
                     if df.at[account_index, "Balance"] > 0:
                         print(f"Successfully withdrew {amount} from account {account_number}.")
+                        opt = get_valid_input("Do you want to show account balance (Y/N):")
+                        if opt == 'Y':
+                            print(f"New Balance: {df.at[account_index, 'Balance']}")
+                        else:
+                            print("Transaction completed.")
+                        return True
                     else:
-                        over_draft(account_number, amount, cr_balance)
-                    opt = str(input("Do you want to show account balance (Y/N):"))
-                    if opt == 'Y':
-                        print(f"New Balance: {df.at[account_index, 'Balance']}")
-
-            else:
-                print("Invalid transaction type.")
+                        over_draft_opt = get_valid_input("You have no sufficient balance do you want to over draft? (Y/N): ")
+                        if over_draft_opt.lower() == 'y':
+                            print(f"Successfully withdrew {amount} from your account {account_number} and your overdraft is {abs(amount - cr_balance)}.")
+                        else:
+                            print("Transaction successful.")
+                            return True
+                        opt = get_valid_input("Do you want to show account balance (Y/N):")
+                        if opt == 'Y':
+                            print(f"New Balance: {df.at[account_index, 'Balance']}")
+                        else:
+                            print("Transaction completed.")
+                        return True
+                else:
+                    print("Invalid transaction type.")
             save_to_excel(df)
         else:
             print("Invalid PIN. Transaction Denied.")
@@ -244,13 +273,32 @@ def transaction(transaction_type, account_number, amount):
         return False
 
 
-def over_draft(account_number, amount, cr_balance):
-    over_draft_opt = get_valid_input("You have no sufficient balance do you want to over draft? (Y/N): ").lower()
-    if over_draft_opt == 'y':
-        print(f"Successfully withdrew {amount} from your account {account_number} and your overdraft is {abs(amount - cr_balance)}.")
+def over_draft():
+    df = load_form_excel()
+    account_number = get_valid_number("Enter your 14 digit account number: ")
+    if account_number in (df["Account Number"].astype(int)).values:
+        account_index = df[df["Account Number"].astype(int) == account_number].index[0]
+        if df.at[account_index, "Account Type"] == "current":
+            account_pin = get_valid_number("Enter your PIN: ")
+            if account_pin == (df.at[account_index, "Account PIN"].astype(int)):
+                amount = float(input("Enter the amount you want to withdraw: "))
+                cr_balance = df.at[account_index, "Balance"]
+                df.at[account_index, "Balance"] -= amount
+                print(f"Successfully withdrew {amount} from your account {account_number} and your overdraft is {abs(amount - cr_balance)}.")
+                if opt == 'Y':
+                    print(f"New Balance: {df.at[account_index, 'Balance']}")
+                else:
+                    print("Transaction completed.")
+                return True
+            else:
+                print("Invalid Pin, try again")
+                return False
+        else:
+            print("Your account is not a current account you can not perform this operation...")
+            return True
     else:
-        print("Transaction successful.")
-        return True
+        print("Invalid Account Number, try again")
+        return False
 
 def validate_account(account_number):
     df = load_form_excel()
@@ -283,6 +331,7 @@ def display_all_account():
                 print(f"{col}\t: ****")
             else:
                 print(f"{col}\t: {row[col]}")
+        print("")
 
 
 initialized_excel()
@@ -293,9 +342,10 @@ while True:
     3. Deposit money
     4. Withdraw money
     5. Calculate Interest
-    6. View all the accounts(Admin only)
-    7. Apply interest to all saving accounts (Admin only)
-    8. Exit''')
+    6. Overdraft for current account
+    7. View all the accounts(Admin only)
+    8. Apply interest to all saving accounts (Admin only)
+    9. Exit''')
 
     opt = int(input("Enter a number(1 to 6): "))
     if opt == 1:
@@ -320,12 +370,19 @@ while True:
         calculate_interest()
         continue
     elif opt == 6:
-        if admin_login():
-            display_all_account()
+        over_draft()
         continue
     elif opt == 7:
         if admin_login():
+            display_all_account()
+        continue
+    elif opt == 8:
+        if admin_login():
             apply_interest_to_saving_account()
         continue
-    else:
+    elif opt == 9:
+        print("Exiting the program...")
         break
+    else:
+        print("invalid input! Please enter again")
+        continue
