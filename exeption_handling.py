@@ -133,7 +133,6 @@ while True:
 
     if opt1 == 1:
         while True:
-            print_all_data()
             print('''\n
 1. Add Country
 2. Add State
@@ -154,14 +153,15 @@ while True:
                 break
 
     elif opt1 == 2:
+        print_all_data()
         print('''\n1. Update Country\n2. Update State\n3. Update City\n4. Exit''')
-        sub_choice = get_valid_input("Select an option: ")
-        if sub_choice == "1":
+        sub_choice = get_valid_number("Select an option: ")
+        if sub_choice == 1:
             update_entry("country", get_valid_input("Enter country to update: "), None, None)
-        elif sub_choice == "2":
+        elif sub_choice == 2:
             update_entry("state", get_valid_input("Enter country for the state: "),
             get_valid_input("Enter state to update: "), None)
-        elif sub_choice == "3":
+        elif sub_choice == 3:
             update_entry("city", get_valid_input("Enter country for city: "), get_valid_input("Enter state for city: "),
             get_valid_input("Enter city to update: "))
         else:
