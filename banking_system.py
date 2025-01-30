@@ -176,37 +176,54 @@ class account_operations(account_details):
         save_to_excel(df)
         print(f"{self.fname} {self.lname}, your account is created successfully.")
 
+
+# def calculate_interest(account_number):
+#     df = load_form_excel()
+#     if account_number.strip() in (df["Account Number"].astype(str)).values:
+#         account_index = df[df["Account Number"] == account_number].index[0]
+#         account_type = df.at[account_index, "Account Type"]
+#         interest_rate = df.at[account_index, "Interest Rate"]
+#         balance = df.at[account_index, "Balance"]
+#
+#         if account_type == "saving" and interest_rate > 0:
+#             interest = balance * interest_rate
+#             df.at[account_index, "Balance"] += interest
+#             print(f"Interest of {interest} has been added to your saving account.")
+#             save_to_excel(df)
+#         else:
+#             print("No interest applicable for this account type")
+#     else:
+#         print("Account number not found.")
 def calculate_interest():
-    type = get_valid_input("For which type of interest you want to calculate(Saving account/Fix deposits/Loans)")
-    amount = get_valid_number("Enter amount:")
+    type_ = get_valid_number("For which type of interest you want to calculate(Saving account(1)/Fix deposits(2)/Loans(3)): ")
+    amount = get_valid_number("Enter amount: ")
     year = get_valid_number("Enter a years: ")
-    if type == "Saving account":
+    if type_ == 1:
         if amount > 5000000:
             interest = (amount * year * 3.5) / 100
-            print(f"Your interest in your {amount} after {year} years is {interest}")
+            print(f"Your interest in your {amount} after {year} years is {interest} and your total amount is {amount+interest}.")
         else:
             interest = (amount * year * 3.0) / 100
-            print(f"Your interest in your {amount} after {year} years is {interest}")
-    elif type == "Fix deposits":
+            print(f"Your interest in your {amount} after {year} years is {interest} and your total amount is {amount+interest}.")
+    elif type_ == 2:
         age = get_valid_number("Enter you age: ")
         if age > 60:
             interest = (amount * year * 7.40) / 100
-            print(f"Your interest in your {amount} after {year} years is {interest}")
+            print(f"Your interest in your {amount} after {year} years is {interest} and your FD amount is {amount+interest}.")
         else:
             interest = (amount * year * 7.90) / 100
-            print(f"Your interest in your {amount} after {year} years is {interest}")
-    elif type == "Loan":
-        type_of_loans = get_valid_input("Enter type of loan (Auto loan/Against Property/Personal loan): ")
-        if type_of_loans == "Auto loan":
+            print(f"Your interest in your {amount} after {year} years is {interest} and your FD amount is {amount+interest}.")
+    elif type_ == 3:
+        type_of_loans = get_valid_number("Enter type of loan (Auto loan(1)/Against Property(2)/Personal loan(3)): ")
+        if type_of_loans == 1:
             interest = (amount * year * 14.00) / 100
-            print(
-                f"if you apply loan for {amount} for {year} yeas then your interest is {interest} and the end you have to pay {amount + interest}")
-        elif type_of_loans == "Against Property":
+            print(f"if you apply loan for {amount} for {year} yeas then your interest is {interest} and the end you have to pay {amount + interest}")
+        elif type_of_loans == 2:
             interest = (amount * year * 13.30) / 100
             print(
                 f"if you apply loan for {amount} for {year} yeas then your interest is {interest} and the end you have to pay {amount + interest}")
 
-        elif type_of_loans == "Personal loan":
+        elif type_of_loans == 3:
             interest = (amount * year * 24.14) / 100
             print(
                 f"if you apply loan for {amount} for {year} yeas then your interest is {interest} and the end you have to pay {amount + interest}")
