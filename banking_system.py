@@ -10,7 +10,7 @@ MINIMUM_BALANCE_SAVING_ACCOUNT = 500
 
 def initialized_excel():
     if not os.path.exists(excel_file):
-        df = pd.DataFrame(columns=["Account Number", "Name", "Mobile Number", "Email", "Address", "Account Type", 
+        df = pd.DataFrame(columns=["Account Number", "Name", "Mobile Number", "Email", "Address", "Account Type",
                                    "IFSC code", "Branch Name", "Branch Address", "Account PIN", "Balance"])
         df.to_excel(excel_file, index=False)
         print("Excel file created with Headers.")
@@ -20,7 +20,7 @@ def initialized_excel():
 def load_form_excel():
     if os.path.exists(excel_file):
         return pd.read_excel(excel_file)
-    return pd.DataFrame(columns=["Account Number", "Name", "Mobile Number", "Email", "Address", "Account Type", 
+    return pd.DataFrame(columns=["Account Number", "Name", "Mobile Number", "Email", "Address", "Account Type",
                                  "IFSC code", "Branch Name", "Branch Address", "Account PIN", "Balance"])
 
 def save_to_excel(df):
@@ -131,12 +131,12 @@ def calculate_interest():
 
 def transaction(transaction_type, account_number, amount):
     df = load_form_excel()
-    if account_number not in df["Account Number"].astype(str).values:
+    if account_number not in df["Account Number"].astype(int).values:
         print("Account not found.")
         return
     account_index = df[df["Account Number"] == account_number].index[0]
     account_pin = get_valid_input("Enter your PIN: ", True)
-    if account_pin != df.at[account_index, "Account PIN"]:
+    if account_pin != df.at[account_index, "Account PIN"].astype(int):
         print("Invalid PIN.")
         return
     if transaction_type == "deposit":
@@ -154,15 +154,15 @@ def transaction(transaction_type, account_number, amount):
 def over_draft():
     df = load_form_excel()
     account_number = get_valid_input("Enter your 14 digit account number: ", True)
-    if account_number not in df["Account Number"].astype(str).values:
+    if account_number not in df["Account Number"].astype(int).values:
         print("Account not found.")
         return
     account_index = df[df["Account Number"] == account_number].index[0]
-    if df.at[account_index, "Account Type"] != "current":
+    if df.at[account_index, "Account Type"].astype(str) != "current":
         print("Only current accounts can have overdraft.")
         return
     account_pin = get_valid_input("Enter your PIN: ", True)
-    if account_pin != df.at[account_index, "Account PIN"]:
+    if account_pin != df.at[account_index, "Account PIN"].astype(int):
         print("Invalid PIN.")
         return
     amount = get_valid_input("Enter the amount you want to withdraw: ", True)
@@ -175,6 +175,7 @@ def display_all_account():
     df = load_form_excel()
     for _, row in df.iterrows():
         print("\n".join([f"{col}: {'****' if col == 'Account PIN' else row[col]}" for col in df.columns]))
+        print("")
 
 initialized_excel()
 while True:
