@@ -30,7 +30,7 @@ def get_valid_input(prompt: str, is_alpha=True) -> str:
         print(f"Invalid input! Please enter a valid {'name' if is_alpha else 'number'}.")
 
 def print_current_data(level, country=None, state=None):
-    if not data :
+    if not data:
         print("No data available right now.\n")
     else:
         print("\nCurrent Data:")
@@ -40,9 +40,12 @@ def print_current_data(level, country=None, state=None):
         elif level == 'state':
             if country in data:
                 print(f"{country}:")
-                for state in data[country]:
-                    print(f"  State: {state}")
-                    print(f"    Cities: {', '.join(data[country][state]) if data[country][state] else 'No cities added'}")
+                if data[country]:
+                    for state in data[country]:
+                        print(f"  State: {state}")
+                        print(f"    Cities: {', '.join(data[country][state]) if data[country][state] else 'No cities added'}")
+                else:
+                    print(f"No states added in {country}.")
             else:
                 print(f"{country} does not exist.")
         elif level == 'city':
@@ -50,10 +53,14 @@ def print_current_data(level, country=None, state=None):
                 print(f"{country}:")
                 for state in data[country]:
                     print(f"  State: {state}")
-                    print(f"    Cities: {', '.join(data[country][state]) if data[country][state] else 'No cities added'}")
+                    if data[country][state]:
+                        print(f"    Cities: {', '.join(data[country][state])}")
+                    else:
+                        print(f"    No cities added in {state}.")
 
 def add_entry(type_: str):
     load_from_excel()
+
     def add_fn(country=None, state=None, city=None):
         if type_ == "country":
             print_current_data(type_)
@@ -64,10 +71,15 @@ def add_entry(type_: str):
                 else:
                     print(f"{country} already exists.")
         elif type_ == "state":
-            print_all_data()
+            print_current_data("country")
+            if not any(data):
+                print("No countries exist to add a state.")
+                return
             country = get_valid_input("Enter the country for the state: ")
-            if country not in data: print(f"{country} does not exist. Add country first."); return
-            print_current_data(type_)
+            if country not in data:
+                print(f"{country} does not exist. Add country first.")
+                return
+            print_current_data("state")
             for _ in range(int(get_valid_input(f"How many states to add to {country}? ", False))):
                 state = get_valid_input(f"Enter the name of the state in {country}: ")
                 if state not in data[country]:
@@ -75,10 +87,16 @@ def add_entry(type_: str):
                 else:
                     print(f"{state} already exists in {country}.")
         elif type_ == "city":
-            print_all_data()
-            country, state = get_valid_input("Enter the country for the city: "), get_valid_input(f"Enter the state in {country}: ")
-            if country not in data or state not in data[country]: print(f"Add the country/state first."); return
-            print_current_data(city)
+            print_current_data("state")
+            if not any([bool(data[country]) for country in data]):
+                print("No states exist to add a city.")
+                return
+            country = get_valid_input("Enter the country for the city: ")
+            state = get_valid_input(f"Enter the state in {country}: ")
+            if country not in data or state not in data[country]:
+                print(f"Add the country/state first.")
+                return
+            print_current_data("city")
             for _ in range(int(get_valid_input(f"How many cities to add in {state}, {country}? ", False))):
                 city = get_valid_input(f"Enter the name of the city: ")
                 if city not in data[country][state]:
@@ -93,9 +111,18 @@ def update_entry(type_: str, country=None, state=None, city=None):
     def update_fn(country, state, city, new_name):
         if type_ == "country" and new_name not in data:
             data[new_name] = data.pop(country)
-        elif type_ == "state" and new_name not in data[country]:
-            data[country][new_name] = data[country].pop(state)
+        elif type_ == "state":
+            if state not in data[country]:
+                print(f"State {state} does not exist in {country}. Cannot update.")
+                return
+            if new_name not in data[country]:
+                data[country][new_name] = data[country].pop(state)
+            else:
+                print(f"{new_name} already exists in {country}.")
         elif type_ == "city":
+            if city not in data[country][state]:
+                print(f"City {city} does not exist in {state}, {country}. Cannot update.")
+                return
             data[country][state][data[country][state].index(city)] = new_name
         else:
             print(f"{new_name} already exists in the same level.")
@@ -108,9 +135,15 @@ def remove_entry(type_: str, country=None, state=None, city=None):
     def remove_fn(country, state, city):
         if type_ == "country" and country in data:
             del data[country]
-        elif type_ == "state" and state in data[country]:
+        elif type_ == "state":
+            if state not in data[country]:
+                print(f"State {state} does not exist in {country}. Cannot remove.")
+                return
             del data[country][state]
-        elif type_ == "city" and city in data[country][state]:
+        elif type_ == "city":
+            if city not in data[country][state]:
+                print(f"City {city} does not exist in {state}, {country}. Cannot remove.")
+                return
             data[country][state].remove(city)
         else:
             print(f"{type_} does not exist in the specified location.")
@@ -139,27 +172,40 @@ load_from_excel()
 while True:
     print('''\n1. Add\n2. Update\n3. Remove\n4. Print All Data\n5. Exit\n''')
     choice = get_valid_input("Select an option: ", False)
+    
     if choice == "1":
         while True:
             print('''\n1. Add Country\n2. Add State\n3. Add City\n4. Exit''')
             sub_choice = get_valid_input("Select an option: ", False)
+            
             if sub_choice == "1":
                 add_entry("country")
                 save_to_file()
                 continue
             elif sub_choice == "2":
-                add_entry("state")
+                if not any(data):
+                    print("No countries exist to add a state.")
+                else:
+                    add_entry("state")
                 save_to_file()
                 continue
             elif sub_choice == "3":
-                add_entry("city")
+                country = get_valid_input("Enter the country for the city: ")
+                if country not in data or not data[country]:
+                    print(f"No states exist in {country}. Cannot add a city.")
+                else:
+                    add_entry("city")
                 save_to_file()
                 continue
-            elif sub_choice == "4" : break
-            else:continue
+            elif sub_choice == "4":
+                break
+            else:
+                continue
+
     elif choice == "2":
         while True:
-            if not data: print("No data available");break
+            if not data: 
+                print("No data available"); break
             else:
                 print('''\n1. Update Country\n2. Update State\n3. Update City\n4. Exit''')
                 sub_choice = get_valid_input("Select an option: ", False)
@@ -168,28 +214,56 @@ while True:
                     save_to_file()
                     continue
                 elif sub_choice == "2":
-                    if not data.values(): break
-                    update_entry("city", get_valid_input("Enter country for state: "), get_valid_input("Enter state to update: "), None)
+                    country = get_valid_input("Enter country for state: ")
+                    if country in data and not data[country]:
+                        print(f"No states exist in {country}. Cannot update state.")
+                    else:
+                        update_entry("state", country, get_valid_input("Enter state to update: "), None)
                     save_to_file()
                     continue
                 elif sub_choice == "3":
-                    update_entry("city", get_valid_input("Enter country for city: "), get_valid_input("Enter state for city: "), get_valid_input("Enter city to update: "))
+                    country = get_valid_input("Enter country for city: ")
+                    state = get_valid_input("Enter state for city: ")
+                    if country in data and state in data[country] and not data[country][state]:
+                        print(f"No cities exist in {state}, {country}. Cannot update city.")
+                    else:
+                        update_entry("city", country, state, get_valid_input("Enter city to update: "))
                     continue
-                elif sub_choice == "4": break
-                else: break
+                elif sub_choice == "4":
+                    break
+                else:
+                    break
+
     elif choice == "3":
         while True:
-            if not data: print("No data available");break
+            if not data: 
+                print("No data available"); break
             else:
                 print('''\n1. Remove Country\n2. Remove State\n3. Remove City\n4. Exit''')
                 sub_choice = get_valid_input("Select an option: ", False)
-                if sub_choice == "1": remove_entry("country", get_valid_input("Enter country to remove: "))
-                elif sub_choice == "2": remove_entry("state", get_valid_input("Enter country for state removal: "), get_valid_input("Enter state to remove: "))
-                elif sub_choice == "3": remove_entry("city", get_valid_input("Enter country for city removal: "), get_valid_input("Enter state for city removal: "), get_valid_input("Enter city to remove: "))
-                elif sub_choice == "4": break
-                else: break
+                if sub_choice == "1":
+                    remove_entry("country", get_valid_input("Enter country to remove: "))
+                elif sub_choice == "2":
+                    country = get_valid_input("Enter country for state removal: ")
+                    if country in data and not data[country]:
+                        print(f"No states exist in {country}. Cannot remove state.")
+                    else:
+                        remove_entry("state", country, get_valid_input("Enter state to remove: "), None)
+                elif sub_choice == "3":
+                    country = get_valid_input("Enter country for city removal: ")
+                    state = get_valid_input("Enter state for city removal: ")
+                    if country in data and state in data[country] and not data[country][state]:
+                        print(f"No cities exist in {state}, {country}. Cannot remove city.")
+                    else:
+                        remove_entry("city", country, state, get_valid_input("Enter city to remove: "))
+                elif sub_choice == "4":
+                    break
+                else:
+                    break
+
     elif choice == "4":
         print_all_data()
+
     elif choice == "5":
         print("Exiting the program...")
         break
