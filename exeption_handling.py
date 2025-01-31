@@ -132,6 +132,7 @@ while True:
         continue
 
     if opt1 == 1:
+        print_all_data()
         while True:
             print('''\n
 1. Add Country
@@ -154,20 +155,26 @@ while True:
 
     elif opt1 == 2:
         print_all_data()
-        print('''\n1. Update Country\n2. Update State\n3. Update City\n4. Exit''')
-        sub_choice = get_valid_number("Select an option: ")
-        if sub_choice == 1:
-            update_entry("country", get_valid_input("Enter country to update: "), None, None)
-        elif sub_choice == 2:
-            update_entry("state", get_valid_input("Enter country for the state: "),
-            get_valid_input("Enter state to update: "), None)
-        elif sub_choice == 3:
-            update_entry("city", get_valid_input("Enter country for city: "), get_valid_input("Enter state for city: "),
-            get_valid_input("Enter city to update: "))
-        else:
-            break
+        while True:
+            print('''\n1. Update Country\n2. Update State\n3. Update City\n4. Exit''')
+            sub_choice = get_valid_number("Select an option: ")
+            if sub_choice == 1:
+                country_to_update = get_valid_input("Enter country to update: ")
+                update_entry("country", country_to_update, None, None)
+            elif sub_choice == 2:
+                country_to_update = get_valid_input("Enter country for the state: ")
+                state_to_update = get_valid_input("Enter state to update: ")
+                update_entry("state", country_to_update, state_to_update, None)
+            elif sub_choice == 3:
+                country_to_update = get_valid_input("Enter country for city: ")
+                state_to_update = get_valid_input("Enter state for city: ")
+                city_to_update = get_valid_input("Enter city to update: ")
+                update_entry("city", country_to_update, state_to_update, city_to_update)
+            else:
+                break
 
     elif opt1 == 3:
+        print_all_data()
         while True:
             print('''\n
 1. Remove Country
